@@ -20,6 +20,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
 
     useEffect(() => {
+    
     fetchServices();
 
     socket.on("serviceAdded", (newService) => {
@@ -54,6 +55,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       socket.off("serviceStatusUpdated");
       socket.off("serviceAdded");
       socket.off("WhatsappServiceAdded");
+      socket.off("initial-data");
     };
   }, []);
 
