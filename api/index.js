@@ -41,6 +41,15 @@ io.on('connection', (socket) => {
   });
 });
 
+socket.emit('initial-data', { message: 'Hello from the server' });
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
+});
 
 mongoose.connect('mongodb+srv://Rushaid44:1234@cluster0.dkoeb.mongodb.net/')
 .then(() => {

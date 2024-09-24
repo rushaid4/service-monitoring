@@ -19,7 +19,7 @@ const ServiceDetails = () => {
         console.log("inside fetch 11")
         const response = await fetch(`https://service-monitoring-server.vercel.app/${id}`);
         // const response = await fetch(`${window.location.origin}/service/${id}`);
-        console.log("inside fetch 11")
+        console.log("inside fetch 1111")
         const data = await response.json();
         console.log("data is ",data)
 

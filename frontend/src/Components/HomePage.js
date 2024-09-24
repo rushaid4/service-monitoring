@@ -39,6 +39,13 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       );
     });
 
+    socket.on('initial-data', (data) => {
+      console.log('Received from server:', data);
+    });
+
+    io.on('connection', (socket) => {
+      console.log('a user connected');
+
     socket.on('connect_error', (error) => {
       console.error('Connection error:', error);
       // Implement a backoff strategy or limit reconnection attempts
