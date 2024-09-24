@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import './styles/ServiceDetails.css';  // Import the CSS file
 import io from 'socket.io-client'
 
-const socket = io('https://service-monitoring-server.vercel.app/');
+const socket = io('https://service-monitoring-server.vercel.app');
 // const socket = io(`${window.location.origin}`);
 
 const ServiceDetails = () => {
