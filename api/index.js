@@ -34,22 +34,21 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
   console.log('New client connected');
+
+   // Emit initial data to the connected client
+   socket.emit('initial-data', { message: 'Hello from the server' });
   
   // You can handle client events here if needed
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });
-});
-
-socket.emit('initial-data', { message: 'Hello from the server' });
-
-io.on('connection', (socket) => {
-  console.log('a user connected');
 
   socket.on('error', (error) => {
     console.error('Socket error:', error);
   });
 });
+
+
 
 mongoose.connect('mongodb+srv://Rushaid44:1234@cluster0.dkoeb.mongodb.net/')
 .then(() => {
