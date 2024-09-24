@@ -20,8 +20,8 @@ app.use(bodyParser.json());
 app.use(cors())
 app.use(express.json());
 
-app.get('/api', (req, res) => {
-  res.json({ message: 'API working!' });
+app.get('/', (req, res) => {
+  res.json("hello");
 });
 
 const server = http.createServer(app)
