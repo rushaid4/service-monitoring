@@ -20,9 +20,7 @@ app.use(bodyParser.json());
 app.use(cors())
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json("hello");
-});
+
 
 const server = http.createServer(app)
 const io = new Server(server, {
@@ -376,10 +374,14 @@ const monitorService = async (service) => {
 
 // module.exports = app;
 
-app.get("/", (req, res) => {
-  app.use(express.static(path.resolve(__dirname, "frontend", "build")));
+// app.get("/", (req, res) => {
+//   app.use(express.static(path.resolve(__dirname, "frontend", "build")));
   
-  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
+//   res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
+// });
+
+app.get('/', (req, res) => {
+  res.json("hello world");
 });
 
 server.listen(port, () => {
