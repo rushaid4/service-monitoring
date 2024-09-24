@@ -16,7 +16,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   const navigate = useNavigate();
   
-  const socket = io("https://service-monitoring-server.vercel.app/");
+  const socket = io("https://service-monitoring-server.vercel.app");
 
 
     useEffect(() => {
