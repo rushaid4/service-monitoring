@@ -17,7 +17,11 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'your_jwt_secret_key'; 
 
 app.use(bodyParser.json());
-app.use(cors())
+app.use(cors({
+  origin: 'https://service-monitoring-server.vercel.app', // Replace with your frontend URL
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json());
 
 
