@@ -16,7 +16,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   const navigate = useNavigate();
   
-  const socket = io("http://localhost:5000");
+  const socket = io("https://service-monitoring-server.vercel.app/");
 
 
     useEffect(() => {
@@ -55,7 +55,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/status");
+      const response = await axios.get("https://service-monitoring-server.vercel.app/status");
       // const response = await axios.get(`${window.location.origin}/status`);
 
       if (Array.isArray(response.data)) {

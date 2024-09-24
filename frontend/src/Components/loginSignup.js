@@ -21,7 +21,7 @@ const LoginSignup = ({handleLogin}) => {
   const login = async () => {
     console.log("Inside login function");
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("https://service-monitoring-server.vercel.app/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

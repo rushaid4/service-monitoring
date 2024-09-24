@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import './styles/ServiceDetails.css';  // Import the CSS file
 import io from 'socket.io-client'
 
-const socket = io('http://localhost:5000');
+const socket = io('https://service-monitoring-server.vercel.app/');
 // const socket = io(`${window.location.origin}`);
 
 const ServiceDetails = () => {
@@ -17,7 +17,7 @@ const ServiceDetails = () => {
     const fetchServiceDetails = async () => {
       try {
         console.log("inside fetch 11")
-        const response = await fetch(`http://localhost:5000/service/${id}`);
+        const response = await fetch(`https://service-monitoring-server.vercel.app/${id}`);
         // const response = await fetch(`${window.location.origin}/service/${id}`);
         console.log("inside fetch 11")
         const data = await response.json();
