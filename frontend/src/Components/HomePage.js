@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./styles/HomePage.css";
-import io from "socket.io-client";
 import { FiLogOut } from "react-icons/fi";
 import { FiLogIn } from "react-icons/fi";
 import { CgDetailsMore } from "react-icons/cg";
@@ -16,48 +15,41 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   const navigate = useNavigate();
   
-  const socket = io("https://service-monitoring-server.vercel.app");
-
-
     useEffect(() => {
     
     fetchServices();
 
-    socket.on("serviceAdded", (newService) => {
-      setServices((prevServices) => [...prevServices, newService]); // Add new service directly to the list
+    const eventSource = new EventSource("https://service-monitoring-server.vercel.app/events"); 
+
+    eventSource.addEventListener("serviceAdded", (event) => {
+      const newService = JSON.parse(event.data);
+      setServices((prevServices) => [...prevServices, newService]);
     });
 
-    socket.on("WhatsappServiceAdded", (newService) => {
-      setServices((prevServices) => [...prevServices, newService]); // Add new WhatsApp service directly to the list
-    });
+  eventSource.addEventListener("WhatsappServiceAdded", (event) => {
+    const newService = JSON.parse(event.data);
+    setServices((prevServices) => [...prevServices, newService]);
+  });
 
-    // Listen for updates from the backend
-    socket.on("serviceStatusUpdated", (updatedService) => {
-      setServices((prevServices) =>
-        prevServices.map((service) =>
-          service._id === updatedService._id ? updatedService : service
-        )
-      );
-    });
+  eventSource.addEventListener("serviceStatusUpdated", (event) => {
+    const updatedService = JSON.parse(event.data);
+    setServices((prevServices) =>
+      prevServices.map((service) =>
+        service._id === updatedService._id ? updatedService : service
+      )
+    );
+  });
 
-    socket.on("initial-data", (data) => {
-      console.log('Received from server:', data);
-    });
-
-
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
-      // Implement a backoff strategy or limit reconnection attempts
-    });
-
-    // Cleanup on component unmount
-    return () => {
-      socket.off("serviceStatusUpdated");
-      socket.off("serviceAdded");
-      socket.off("WhatsappServiceAdded");
-      socket.off("initial-data");
-    };
-  }, []);
+  eventSource.onerror = (error) => {
+    console.error('SSE Connection error:', error);
+    // You can handle reconnection logic or errors here if needed
+  };
+// Clean up the EventSource connection when component unmounts
+return () => {
+  eventSource.close();
+};
+}, []);
+ 
 
 
   const fetchServices = async () => {

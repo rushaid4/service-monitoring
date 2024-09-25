@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import './styles/ServiceDetails.css';  // Import the CSS file
-import io from 'socket.io-client'
 
-const socket = io('https://service-monitoring-server.vercel.app');
-// const socket = io(`${window.location.origin}`);
 
+// const eventSource = new EventSource("https://service-monitoring-server.vercel.app/sse");  // URL to your SSE endpoint
+
+const eventSource = new EventSource("https://service-monitoring-server.vercel.app/events"); 
 const ServiceDetails = () => {
 
   const { id } = useParams();
@@ -35,19 +35,19 @@ const ServiceDetails = () => {
 
     fetchServiceDetails();
 
-    // Listen for updates from the server
-    socket.on('ServiceDetails', (updatedService) => {
-      if (updatedService._id === id) {
-        setService(updatedService); // Update the service details with the new data
-      }
-    });
+  // Listen for SSE updates for service details
+  eventSource.addEventListener("ServiceDetails", (event) => {
+    const updatedService = JSON.parse(event.data);
+    if (updatedService._id === id) {
+      setService(updatedService); // Update service details
+    }
+  });
 
-
+  // Clean up on component unmount
   return () => {
-      
-    socket.off('ServiceDetails'); // Clean up the socket listener on component unmount
-    };
-  }, [id]);
+    eventSource.close();
+  };
+}, [id]);
 
   if (!service) {
     return <div className="loading">Loading...</div>;

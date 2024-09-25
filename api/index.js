@@ -3,7 +3,6 @@ const path = require("path");
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const {Server} = require('socket.io');
 const cors = require('cors');
 const http = require('http');
 const mongoose = require('mongoose');
@@ -11,46 +10,60 @@ const sendSMS = require('./sendSMS')
 const sendCall = require('./sendCall');
 
 const app = express();
-const port = 5000;
+const port = 5001;
 
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'your_jwt_secret_key'; 
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://service-monitoring-server.vercel.app', // Replace with your frontend URL
+  origin: ['https://service-monitoring.vercel.app'], // Replace with your frontend URL
   methods: ["GET", "POST"],
   credentials: true
 }));
 app.use(express.json());
 
-
-
 const server = http.createServer(app)
-const io = new Server(server, {
-  cors: {
-    origin: 'https://service-monitoring-server.vercel.app',
-    methods: ["GET","POST"],
-    credentials: true,
-  },
-})
 
-io.on('connection', (socket) => {
-  console.log('New client connected:', socket.id);
-  console.log('New client connected');
-
-   // Emit initial data to the connected client
-   socket.emit('initial-data', { message: 'Hello from the server' });
+// Add this new route for Server-Sent Events (SSE)
+app.get('/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
   
-  // You can handle client events here if needed
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
+  // Function to send data as Server-Sent Event
+  const sendEvent = (eventName, data) => {
+    res.write(`event: ${eventName}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+  
+  // Emit initial data when a client connects
+  sendEvent('initial-data', { message: 'Hello from the server' });
+  
+  // Store this connection in a global array (or handle more appropriately)
+  clients.push(res);
 
-  socket.on('error', (error) => {
-    console.error('Socket error:', error);
+  // Handle client disconnect
+  req.on('close', () => {
+    console.log('Client disconnected');
+    clients = clients.filter(client => client !== res);
   });
 });
+
+// Global array to hold clients
+let clients = [];
+
+// Function to broadcast SSE to all clients
+const broadcastEvent = (eventName, data) => {
+  clients.forEach(client => {
+    client.write(`event: ${eventName}\n`);
+    client.write(`data: ${JSON.stringify(data)}\n\n`);
+  });
+};
+
+
+
+
 
 
 
@@ -129,17 +142,18 @@ const notifyUser = (notifications, serviceName, status) => {
 
 
 setInterval(() => {
-  monitorServices()
-}, 60000);
+  monitorServices();
+}, 30000); // 30 seconds
+
 
 
 
 
 app.post('/add-service' , async (req, res) => {
   try {
-    console.log("Received request at /add-service");
+    console.log("Received request at /add-service  ");
     const newService = new Service(req.body);
-  
+    console.log(newService)
     let status;
     let responseTime;
     let errorDetails = { errorCode: null, errorMessage: null }; 
@@ -181,7 +195,7 @@ app.post('/add-service' , async (req, res) => {
      console.log("Service saved with status:", status);
 
      // Emit the new service data to the frontend
-    io.emit('serviceAdded', newService);
+     broadcastEvent('serviceAdded', newService);
 
  
      // Notify the user about the initial status
@@ -244,7 +258,7 @@ app.post('/add-whatsapp-service', async (req, res) => {
     await newService1.save();
     
     // Emit the new WhatsApp service data to the frontend
-    io.emit('WhatsappServiceAdded', newService1);
+    broadcastEvent('WhatsappServiceAdded', newService1);
 
     console.log("new service in add :",newService1)
     console.log("status of whatsapp is",status)
@@ -364,21 +378,20 @@ const monitorService = async (service) => {
         errorDetails: errorDetails // Update error details
 
       });
-
+    }
         // Update the service with new status details
    const updatedService = await Service.findByIdAndUpdate(service._id, {
     status,
     responseTime,
     lastChecked: new Date(),
     statusHistory: service.statusHistory,
-    
+    }, { new: true });
 
-  }, { new: true });
-
-  // Emit updated service data to the frontend
-  io.emit('serviceStatusUpdated', updatedService);
-    }
-    console.log(`Service ${service.name} status updated to ${status}`);
+  
+  // Broadcast service update through SSE
+  broadcastEvent('serviceStatusUpdated', updatedService);
+   
+  console.log(`Service ${service.name} status updated to ${status}`);
   } catch (error) {
     console.error("Error checking service status:", error);
   }
