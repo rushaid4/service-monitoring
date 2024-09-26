@@ -165,7 +165,7 @@ app.post('/add-service' , async (req, res) => {
      console.log("Service saved with status:", status);
 
      // Emit the new service data to the frontend
-     pusher.trigger("service-channel", "service-added", newService);
+     pusher.trigger('service-channel', 'service-added', newService);
 
  
      // Notify the user about the initial status
@@ -228,7 +228,7 @@ app.post('/add-whatsapp-service', async (req, res) => {
     await newService1.save();
     
     // Emit the new WhatsApp service data to the frontend
-    pusher.trigger("service-channel", "whatsapp-service-added", newService1);
+    pusher.trigger('service-channel', 'whatsapp-service-added', newService1);
 
     console.log("new service in add :",newService1)
     console.log("status of whatsapp is",status)
@@ -369,7 +369,7 @@ const monitorService = async (service) => {
 
   
   // Broadcast service update through Pusher
-pusher.trigger("service-channel", "service-status-updated", updatedService);
+pusher.trigger('service-channel', 'service-status-updated', updatedService);
 
 // pusher.trigger('service-channel', 'service-status-updated', {
 //   serviceName: updatedService.name,
