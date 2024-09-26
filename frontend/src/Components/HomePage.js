@@ -20,17 +20,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
     
     fetchServices();
 
-    // pusher.connection.bind('connected', function() {
-    //   console.log('Pusher connected');
-    // });
-    
-    // pusher.connection.bind('disconnected', function() {
-    //   console.log('Pusher disconnected');
-    // });
-    
-    // pusher.connection.bind('error', function(err) {
-    //   console.log('Pusher error:', err);
-    // });
+  
     
     const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
       cluster: 'ap2',
@@ -53,11 +43,22 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       });
   
       // Listen for service status updated event
+      // channel.bind('service-status-updated', (data) => {
+      //   console.log("data is ", data)
+      //   const updatedService = data;
+      //   setServices((prevServices) =>
+      //     prevServices.map((service) =>
+      //       service._id === updatedService._id ? updatedService : service
+      //     )
+      //   );
+      // });
+
       channel.bind('service-status-updated', (data) => {
-        const updatedService = data;
+
+        console.log("data is ",data)
         setServices((prevServices) =>
           prevServices.map((service) =>
-            service._id === updatedService._id ? updatedService : service
+            service._id === data.serviceName ? { ...service, status: data.status } : service
           )
         );
       });
@@ -65,7 +66,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       // Cleanup on component unmount
       return () => {
         channel.unbind_all();
-        pusher.unsubscribe('my-channel');
+        pusher.unsubscribe('service-channel');
       };
 }, []);
  

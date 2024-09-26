@@ -369,9 +369,13 @@ const monitorService = async (service) => {
 
   
   // Broadcast service update through Pusher
-pusher.trigger("service-channel", "service-status-updated", updatedService);
+// pusher.trigger("service-channel", "service-status-updated", updatedService);
 
-
+pusher.trigger('service-channel', 'service-status-updated', {
+  serviceName: updatedService.name,
+  status: updatedService.status,
+  timestamp: new Date()
+});
    
   console.log(`Service ${service.name} status updated to ${status}`);
   } catch (error) {
