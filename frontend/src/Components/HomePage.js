@@ -46,14 +46,15 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   
       // Listen for service status updated event
       channel.bind('service-status-updated', (data) => {
-        console.log("channal bind homepage service updated")
-        console.log("data is ", data)
-        const updatedService = data;
-        setServices((prevServices) =>
-          prevServices.map((service) =>
-            service._id === updatedService._id ? updatedService : service
-          )
-        );
+        // console.log("channal bind homepage service updated")
+        // console.log("data is ", data)
+        // const updatedService = data;
+        // setServices((prevServices) =>
+        //   prevServices.map((service) =>
+        //     service._id === updatedService._id ? updatedService : service
+        //   )
+        // );
+        fetchServices();
       });
 
       // channel.bind('service-status-updated', (data) => {
