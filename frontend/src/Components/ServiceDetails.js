@@ -25,7 +25,7 @@ const ServiceDetails = () => {
 
     return () => {
       channel.unbind_all();
-      channel.unsubscribe();
+      pusher.unsubscribe('service-channel');
     };
   }, [id]);
 
@@ -34,7 +34,7 @@ const ServiceDetails = () => {
     const fetchServiceDetails = async () => {
       try {
         console.log("inside fetch 11")
-        const response = await fetch(`https://service-monitoring-server.vercel.app/${id}`);
+        const response = await fetch(`https://service-monitoring-server.vercel.app/service/${id}`);
         // const response = await fetch(`${window.location.origin}/service/${id}`);
         console.log("inside fetch 1111")
         const data = await response.json();
