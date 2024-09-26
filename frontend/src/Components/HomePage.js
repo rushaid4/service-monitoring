@@ -43,25 +43,25 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       });
   
       // Listen for service status updated event
-      // channel.bind('service-status-updated', (data) => {
-      //   console.log("data is ", data)
-      //   const updatedService = data;
-      //   setServices((prevServices) =>
-      //     prevServices.map((service) =>
-      //       service._id === updatedService._id ? updatedService : service
-      //     )
-      //   );
-      // });
-
       channel.bind('service-status-updated', (data) => {
-
-        console.log("data is ",data)
+        console.log("data is ", data)
+        const updatedService = data;
         setServices((prevServices) =>
           prevServices.map((service) =>
-            service._id === data.serviceName ? { ...service, status: data.status } : service
+            service._id === updatedService._id ? updatedService : service
           )
         );
       });
+
+      // channel.bind('service-status-updated', (data) => {
+
+      //   console.log("data is ",data)
+      //   setServices((prevServices) =>
+      //     prevServices.map((service) =>
+      //       service._id === data.serviceName ? { ...service, status: data.status } : service
+      //     )
+      //   );
+      // });
   
       // Cleanup on component unmount
       return () => {

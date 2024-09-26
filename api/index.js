@@ -369,13 +369,13 @@ const monitorService = async (service) => {
 
   
   // Broadcast service update through Pusher
-// pusher.trigger("service-channel", "service-status-updated", updatedService);
+pusher.trigger("service-channel", "service-status-updated", updatedService);
 
-pusher.trigger('service-channel', 'service-status-updated', {
-  serviceName: updatedService.name,
-  status: updatedService.status,
-  timestamp: new Date()
-});
+// pusher.trigger('service-channel', 'service-status-updated', {
+//   serviceName: updatedService.name,
+//   status: updatedService.status,
+//   timestamp: new Date()
+// });
    
   console.log(`Service ${service.name} status updated to ${status}`);
   } catch (error) {
@@ -404,157 +404,5 @@ server.listen(port, () => {
 
 
 
-// const checkAPIServices = async () => {
-  
-//   console.log("Inside check API services");
-  
-//   const services = await Service.find({ type: 'API' });
-//   console.log("APIs to check:", services);
 
-//   const promises = services.map(async (service) => {
-//     let status;
-//     try {
-//     const response = await axios({
-//         method: service.method,
-//         url: service.url,
-//         data: service.payload,
-//         timeout: 5000,
-//       });
-
-//       // Validate the response based on the criteria
-//       const isResponseValid = validateResponse(response.data, service.expectedResponse);
-//       status = isResponseValid ? 'up' : 'down';
-//     } catch (error) {
-//       console.log(`Error checking API service ${service.name}:`, error.message);
-//       status = 'down';
-//     }
-
-//     const existingStatus = await Status.findOne({ service: service._id });
-//     console.log("notification preferene is",service.notificationPreference)
-
-//     if (!existingStatus || existingStatus.status !== status) {
-//       notifyUser(service.notifications, service.name, status); 
-//     }
-
-//     await Status.findOneAndUpdate(
-//       { service: service._id },
-//       { status, lastChecked: new Date() },
-//       { upsert: true, new: true }
-//     );
-//   });
-
-//   await Promise.all(promises);
-//   console.log("API services checked.");
-// };
-
-// Function to periodically check the health of all WhatsApp endpoints
-// const checkWhatsAppEndpoints = async () => {
-//   const services = await Service.find({ type: 'WhatsApp' });
-//   console.log("WhatsApp services to check:", services);
-
-//   const promises = services.map(async (service) => {
-//     const status = await checkWhatsAppEndpoint(service);
-
-//     // Check if status has changed
-//     const existingStatus = await Status.findOne({ service: service._id });
-//     if (!existingStatus || existingStatus.status !== status) {
-//       notifyUser(service.notifications, service.name, status);
-//     }
-
-//     // Update the status in the database
-//     await Status.findOneAndUpdate(
-//       { service: service._id },
-//       { status, lastChecked: new Date() },
-//       { upsert: true, new: true }
-//     );
-//   });
-
-//   await Promise.all(promises);
-//   console.log("WhatsApp endpoints checked.");
-// };
-
-// app.post('/add-api-service', async (req, res) => {
-//   console.log("Inside API services");
-//   console.log(req.body);
-
-//   try {
-//     const { name, url, method, payload, expectedResponse, notifications, token } = req.body;
-
-//     if (!name || !url || !method || !payload || !expectedResponse) {
-//       return res.status(400).send('All fields are required');
-//     }
-
-//     console.log('Payload:', payload);
-
-//     // Ensure payload is a valid JSON string or convert it
-//     const validPayload = typeof payload === 'string' ? payload : JSON.stringify(payload);
-
-//     // Define the new service object
-//     const newService = new Service({
-//       name,
-//       type: 'API',
-//       url,
-//       method,
-//       payload: validPayload,
-//       expectedResponse,
-//       notifications,
-//     });
-
-//     console.log("New service is", newService);
-
-//     // Save the new service to the database
-//     await newService.save();
-//     console.log("API service saved");
-
-//     try {
-//       console.log("Making API request");
-
-//       // Define headers based on the presence of a token
-//       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
-//       // Send the API request
-//       const response = await axios({
-//         method: method,
-//         url :url,
-//         data: validPayload,
-//         headers, // Include headers if provided
-//         timeout: 5000,
-//       });
-
-//       console.log("API request successful");
-
-//       // Validate the response data against the expected format
-//       const isResponseValid = validateResponse(response.data, expectedResponse);
-
-//       if (isResponseValid) {
-//         console.log(`API response for ${name} is valid.`);
-//       } else {
-//         console.log(`API response for ${name} is invalid.`);
-//       }
-//     } catch (apiError) {
-//       console.error('Error during API request:', apiError.message);
-//     }
-
-//     res.status(201).send('API Service added successfully');
-//   } catch (error) {
-//     console.error('Error adding API service:', error);
-//     res.status(500).send('Server Error');
-//   }
-// });
-
-// app.listen(port, () => {
-//   console.log(`Backend listening at http://localhost:${port}`);
-// });
-
-// const validateResponse = (actualResponse, expectedResponse) => {
-//   try {
-//     const expected = JSON.parse(expectedResponse);
-    
-//     // Simple validation based on structure
-//     return Object.keys(expected).every(key => key in actualResponse);
-//   } catch (error) {
-//     console.log("Error in response validation:", error.message);
-//     return false;
-//   }
-// };
 
