@@ -61,7 +61,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("http://localhost:5001/status");
+      const response = await axios.get("https://service-monitoring-server.vercel.app/status");
       // const response = await axios.get(`${window.location.origin}/status`);
 
       if (Array.isArray(response.data)) {
