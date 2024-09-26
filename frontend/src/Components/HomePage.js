@@ -22,13 +22,13 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   
     
-    const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+    var pusher = new Pusher(process.env.REACT_APP_APP_ID, {
       cluster: 'ap2',
       encrypted: true,
     });
 
     // Subscribe to the Pusher channel
-    const channel = pusher.subscribe('service-channel');
+    var channel = pusher.subscribe('service-channel');
 
       // Listen for service added event
       channel.bind('service-added', (data) => { 
