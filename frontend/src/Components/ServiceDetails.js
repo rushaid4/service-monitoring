@@ -17,7 +17,9 @@ const ServiceDetails = () => {
     });
 
     const channel = pusher.subscribe('service-channel');
+    
     channel.bind('service-update', function (data) {
+      console.log("channal bind service page")
       if (data.id === id) {
         setService(data); // Update service details in real-time
       }

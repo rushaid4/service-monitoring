@@ -32,18 +32,21 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
       // Listen for service added event
       channel.bind('service-added', (data) => { 
+        console.log("channal bind homepage service added")
         const newService = data;
         setServices((prevServices) => [...prevServices, newService]);
       });
   
       // Listen for WhatsApp service added event
       channel.bind('whatsapp-service-added', (data) => {
+        console.log("channal bind homepage whatsapp service added")
         const newService = data;
         setServices((prevServices) => [...prevServices, newService]);
       });
   
       // Listen for service status updated event
       channel.bind('service-status-updated', (data) => {
+        console.log("channal bind homepage service updated")
         console.log("data is ", data)
         const updatedService = data;
         setServices((prevServices) =>
