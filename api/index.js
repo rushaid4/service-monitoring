@@ -113,7 +113,7 @@ const notifyUser = (notifications, serviceName, status) => {
 
 setInterval(() => {
   monitorServices();
-}, 30000); // 1 min
+}, 60000); // 1 min
 
 
 
