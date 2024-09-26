@@ -19,6 +19,18 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
     useEffect(() => {
     
     fetchServices();
+
+    // pusher.connection.bind('connected', function() {
+    //   console.log('Pusher connected');
+    // });
+    
+    // pusher.connection.bind('disconnected', function() {
+    //   console.log('Pusher disconnected');
+    // });
+    
+    // pusher.connection.bind('error', function(err) {
+    //   console.log('Pusher error:', err);
+    // });
     
     const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
       cluster: 'ap2',

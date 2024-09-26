@@ -16,10 +16,10 @@ const ServiceDetails = () => {
       encrypted: true,
     });
 
-    const channel = pusher.subscribe('my-channel');
+    const channel = pusher.subscribe('service-channel');
     channel.bind('service-update', function (data) {
       if (data.id === id) {
-        setService(data.service); // Update service details in real-time
+        setService(data); // Update service details in real-time
       }
     });
 

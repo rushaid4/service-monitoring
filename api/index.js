@@ -301,7 +301,7 @@ app.get('/service/:id', async (req, res) => {
     // broadcastEvent('ServiceDetails', service);
     
     // Trigger Pusher event
-    pusher.trigger('my-channel', 'service-update', {
+    pusher.trigger('service-channel', 'service-update', {
       id: req.params.id,
       service
     });
