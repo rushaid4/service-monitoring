@@ -8,63 +8,33 @@ const http = require('http');
 const mongoose = require('mongoose');
 const sendSMS = require('./sendSMS')
 const sendCall = require('./sendCall');
+const Pusher = require('pusher');
 
-const app = express();
+const app = express()
 const port = 5001;
 
+
+const pusher = new Pusher({
+   appId : process.env.appId,
+   key : process.env.key,
+   secret : process.env.secret,
+   cluster : process.env.cluster,
+   useTLS: true
+});
+
 const jwt = require('jsonwebtoken');
+const { clearScreenDown } = require('readline');
 const JWT_SECRET = 'your_jwt_secret_key'; 
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: ['https://service-monitoring.vercel.app'], // Replace with your frontend URL
+  origin: ['http://localhost:3000'], // Replace with your frontend URL
   methods: ["GET", "POST"],
   credentials: true
 }));
 app.use(express.json());
 
 const server = http.createServer(app)
-
-// Add this new route for Server-Sent Events (SSE)
-app.get('/events', (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  
-  // Function to send data as Server-Sent Event
-  const sendEvent = (eventName, data) => {
-    res.write(`event: ${eventName}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
-  
-  // Emit initial data when a client connects
-  sendEvent('initial-data', { message: 'Hello from the server' });
-  
-  // Store this connection in a global array (or handle more appropriately)
-  clients.push(res);
-
-  // Handle client disconnect
-  req.on('close', () => {
-    console.log('Client disconnected');
-    clients = clients.filter(client => client !== res);
-  });
-});
-
-// Global array to hold clients
-let clients = [];
-
-// Function to broadcast SSE to all clients
-const broadcastEvent = (eventName, data) => {
-  clients.forEach(client => {
-    client.write(`event: ${eventName}\n`);
-    client.write(`data: ${JSON.stringify(data)}\n\n`);
-  });
-};
-
-
-
-
-
 
 
 mongoose.connect('mongodb+srv://Rushaid44:1234@cluster0.dkoeb.mongodb.net/')
@@ -195,7 +165,7 @@ app.post('/add-service' , async (req, res) => {
      console.log("Service saved with status:", status);
 
      // Emit the new service data to the frontend
-     broadcastEvent('serviceAdded', newService);
+     pusher.trigger("service-channel", "service-added", newService);
 
  
      // Notify the user about the initial status
@@ -258,7 +228,7 @@ app.post('/add-whatsapp-service', async (req, res) => {
     await newService1.save();
     
     // Emit the new WhatsApp service data to the frontend
-    broadcastEvent('WhatsappServiceAdded', newService1);
+    pusher.trigger("service-channel", "whatsapp-service-added", newService1);
 
     console.log("new service in add :",newService1)
     console.log("status of whatsapp is",status)
@@ -326,7 +296,16 @@ app.get('/service/:id', async (req, res) => {
     }
     // Emit the new WhatsApp service data to the frontend
     console.log("Service Data:", service);  // Log service data
-    io.emit('ServiceDetails', service);
+  
+    // Broadcast service update through SSE
+    // broadcastEvent('ServiceDetails', service);
+    
+    // Trigger Pusher event
+    pusher.trigger('my-channel', 'service-update', {
+      id: req.params.id,
+      service
+    });
+
     res.json(service);
   } catch (error) {
     console.error("Error fetching service:", error);
@@ -387,9 +366,12 @@ const monitorService = async (service) => {
     statusHistory: service.statusHistory,
     }, { new: true });
 
+
   
-  // Broadcast service update through SSE
-  broadcastEvent('serviceStatusUpdated', updatedService);
+  // Broadcast service update through Pusher
+pusher.trigger("service-channel", "service-status-updated", updatedService);
+
+
    
   console.log(`Service ${service.name} status updated to ${status}`);
   } catch (error) {

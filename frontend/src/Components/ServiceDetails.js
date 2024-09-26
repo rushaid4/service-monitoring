@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import './styles/ServiceDetails.css';  // Import the CSS file
+import Pusher from 'pusher-js';
 
-
-// const eventSource = new EventSource("https://service-monitoring-server.vercel.app/sse");  // URL to your SSE endpoint
-
-const eventSource = new EventSource("https://service-monitoring-server.vercel.app/events"); 
 const ServiceDetails = () => {
 
   const { id } = useParams();
@@ -13,11 +10,31 @@ const ServiceDetails = () => {
 
 
   useEffect(() => {
+
+    const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+      cluster: 'ap2',
+      encrypted: true,
+    });
+
+    const channel = pusher.subscribe('my-channel');
+    channel.bind('service-update', function (data) {
+      if (data.id === id) {
+        setService(data.service); // Update service details in real-time
+      }
+    });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
+  }, [id]);
+
+  useEffect(() => {
     
     const fetchServiceDetails = async () => {
       try {
         console.log("inside fetch 11")
-        const response = await fetch(`https://service-monitoring-server.vercel.app/${id}`);
+        const response = await fetch(`http://localhost:5001/service/${id}`);
         // const response = await fetch(`${window.location.origin}/service/${id}`);
         console.log("inside fetch 1111")
         const data = await response.json();
@@ -35,18 +52,6 @@ const ServiceDetails = () => {
 
     fetchServiceDetails();
 
-  // Listen for SSE updates for service details
-  eventSource.addEventListener("ServiceDetails", (event) => {
-    const updatedService = JSON.parse(event.data);
-    if (updatedService._id === id) {
-      setService(updatedService); // Update service details
-    }
-  });
-
-  // Clean up on component unmount
-  return () => {
-    eventSource.close();
-  };
 }, [id]);
 
   if (!service) {

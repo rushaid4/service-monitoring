@@ -7,6 +7,7 @@ import { FiLogIn } from "react-icons/fi";
 import { CgDetailsMore } from "react-icons/cg";
 import { FaAngleLeft } from "react-icons/fa";
 import { FaAngleRight } from "react-icons/fa";
+import Pusher from 'pusher-js';
 
 const HomePage = ({ isLoggedIn, handleLogout }) => {
   const [services, setServices] = useState([]);
@@ -18,43 +19,49 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
     useEffect(() => {
     
     fetchServices();
-
-    const eventSource = new EventSource("https://service-monitoring-server.vercel.app/events"); 
-
-    eventSource.addEventListener("serviceAdded", (event) => {
-      const newService = JSON.parse(event.data);
-      setServices((prevServices) => [...prevServices, newService]);
+    
+    const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+      cluster: 'ap2',
+      encrypted: true,
     });
 
-  eventSource.addEventListener("WhatsappServiceAdded", (event) => {
-    const newService = JSON.parse(event.data);
-    setServices((prevServices) => [...prevServices, newService]);
-  });
+    // Subscribe to the Pusher channel
+    const channel = pusher.subscribe('service-channel');
 
-  eventSource.addEventListener("serviceStatusUpdated", (event) => {
-    const updatedService = JSON.parse(event.data);
-    setServices((prevServices) =>
-      prevServices.map((service) =>
-        service._id === updatedService._id ? updatedService : service
-      )
-    );
-  });
-
-  eventSource.onerror = (error) => {
-    console.error('SSE Connection error:', error);
-    // You can handle reconnection logic or errors here if needed
-  };
-// Clean up the EventSource connection when component unmounts
-return () => {
-  eventSource.close();
-};
+      // Listen for service added event
+      channel.bind('service-added', (data) => { 
+        const newService = data;
+        setServices((prevServices) => [...prevServices, newService]);
+      });
+  
+      // Listen for WhatsApp service added event
+      channel.bind('whatsapp-service-added', (data) => {
+        const newService = data;
+        setServices((prevServices) => [...prevServices, newService]);
+      });
+  
+      // Listen for service status updated event
+      channel.bind('service-status-updated', (data) => {
+        const updatedService = data;
+        setServices((prevServices) =>
+          prevServices.map((service) =>
+            service._id === updatedService._id ? updatedService : service
+          )
+        );
+      });
+  
+      // Cleanup on component unmount
+      return () => {
+        channel.unbind_all();
+        pusher.unsubscribe('my-channel');
+      };
 }, []);
  
 
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("https://service-monitoring-server.vercel.app/status");
+      const response = await axios.get("http://localhost:5001/status");
       // const response = await axios.get(`${window.location.origin}/status`);
 
       if (Array.isArray(response.data)) {
@@ -148,8 +155,6 @@ return () => {
       <h1>Status of Buktor Business Platforms</h1>
       </div>
       
-      {/* <p>Last Updated on {latestUpdateTime}</p> */}
-      {console.log("Rendering services: ", services)} {/* Debugging */}
       <div className="header">
         {isLoggedIn && (
           <button
