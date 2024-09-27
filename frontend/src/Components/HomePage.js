@@ -201,11 +201,10 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="service-url">
-                <span
-                  className={`status-dot ${
-                    serviceItem.status === "up" ? "up" : "down"
-                  }`}
-                ></span>
+              <span className={`status-dot ${serviceItem.status === 'up' ? 'up' : serviceItem.status === 'down' ? 'down' : 'unknown'}`}>
+                
+              </span>
+
                 <a href={serviceItem.url}>{serviceItem.name}</a>
               </div>
               <div className="service-details">
