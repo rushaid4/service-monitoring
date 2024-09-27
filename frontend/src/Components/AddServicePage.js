@@ -11,6 +11,8 @@ const AddServicePage = () => {
   
 
   const addService = async (service) => {
+
+    console.log("Inside add service function")
     try {
     
       let endpoint;
@@ -32,8 +34,8 @@ const AddServicePage = () => {
           console.error("Unknown service type:", service.type);
           return;
       }
+   
       const response = await axios.post(`https://service-monitoring-server.vercel.app${endpoint}`, service);
-      // const response = await axios.post(`${window.location.origin}${endpoint}`, service);
     
       console.log('Service added successfully:', response.data);
     } catch (error) {
