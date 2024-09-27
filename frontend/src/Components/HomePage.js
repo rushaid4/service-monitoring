@@ -34,6 +34,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       channel.bind('service-added', (data) => { 
         console.log("channal bind homepage service added")
         const newService = data;
+        console.log("new service in service-added",newService)
         setServices((prevServices) => [...prevServices, newService]);
       });
   
@@ -41,20 +42,21 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       channel.bind('whatsapp-service-added', (data) => {
         console.log("channal bind homepage whatsapp service added")
         const newService = data;
+        console.log("new service in whatsapp service-added",newService)
         setServices((prevServices) => [...prevServices, newService]);
       });
   
       // Listen for service status updated event
       channel.bind('service-status-updated', (data) => {
-        // console.log("channal bind homepage service updated")
-        // console.log("data is ", data)
-        // const updatedService = data;
-        // setServices((prevServices) =>
-        //   prevServices.map((service) =>
-        //     service._id === updatedService._id ? updatedService : service
-        //   )
-        // );
-        fetchServices();
+        console.log("channal bind homepage service updated")
+        console.log("channal bind data is ", data)
+        const updatedService = data;
+        setServices((prevServices) =>
+          prevServices.map((service) =>
+            service._id === updatedService._id ? updatedService : service
+          )
+        );
+        
       });
 
       // channel.bind('service-status-updated', (data) => {
@@ -77,14 +79,19 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
 
   const fetchServices = async () => {
+
+    console.log("Inside fetchServices")
     try {
       const response = await axios.get("https://service-monitoring-server.vercel.app/status");
-      // const response = await axios.get(`${window.location.origin}/status`);
+      
+      console.log("Request for status of all the service sent..")
 
       if (Array.isArray(response.data)) {
         setServices(response.data); // assuming response.data is an array of services
+        console.log("service updated 1");
       } else {
         setServices(response.data.services || []);
+        console.log("service updated 2");
       }
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -99,6 +106,8 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
 
   // Handle "Add Monitor" button click
   const handleAddServiceClick = () => {
+
+    console.log("Inside handleAddServiceClick")
     if (isLoggedIn) {
       navigate("/add-service");
     } else {
