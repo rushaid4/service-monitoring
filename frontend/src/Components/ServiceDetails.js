@@ -13,27 +13,27 @@
 
       console.log("Service details component Rendered")
 
-      const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
-        cluster: 'ap2',
-        encrypted: true,
-      });
+    //   const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+    //     cluster: 'ap2',
+    //     encrypted: true,
+    //   });
 
-      const channel = pusher.subscribe('service-channel');
+    //   const channel = pusher.subscribe('service-channel');
       
-      channel.bind('service-update', function (data) {
-        console.log("channal bind service page")
-        console.log("data in channel bind is ",data);
-        console.log("data id is ",data.id);
-        console.log("id is ",id);
-        if (data.id === id) {
-          setService(data); // Update service details in real-time
-        }
-      });
+    //   channel.bind('service-update', function (data) {
+    //     console.log("channal bind service page")
+    //     console.log("data in channel bind is ",data);
+    //     console.log("data id is ",data.id);
+    //     console.log("id is ",id);
+    //     if (data.id === id) {
+    //       setService(data); // Update service details in real-time
+    //     }
+    //   });
 
-      return () => {
-        channel.unbind_all();
-        pusher.unsubscribe('service-channel');
-      };
+    //   return () => {
+    //     channel.unbind_all();
+    //     pusher.unsubscribe('service-channel');
+    //   };
     }, [id]);
 
     useEffect(() => {
@@ -43,14 +43,14 @@
           console.log("inside fetchServiceDetails function")
           const response = await fetch(`https://service-monitoring-server.vercel.app/service/${id}`);
           console.log("inside fetch 1111")
-          // const data = await response.json();
-          // console.log("data is ",data)
+          const data = await response.json();
+          console.log("data is ",data)
 
-          // if (response.ok) {
-          //   setService(data);
-          // } else {
-          //   console.error("Error fetching service details:", data.message);
-          // }
+          if (response.ok) {
+            setService(data);
+          } else {
+            console.error("Error fetching service details:", data.message);
+          }
         } catch (error) {
           console.error("Error fetching service details:", error);
         }
