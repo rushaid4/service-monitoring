@@ -41,7 +41,7 @@
       const fetchServiceDetails = async () => {
         try {
           console.log("inside fetchServiceDetails function")
-          const response = await fetch(`https://service-monitoring-server.vercel.app/service/${id}`);
+          const response = await fetch(`http://localhost:5001/service/${id}`);
           console.log("inside fetch 1111")
           const data = await response.json();
           console.log("data is ",data)

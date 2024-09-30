@@ -15,19 +15,18 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   const servicesPerPage = 7; // Number of services per page
 
   const navigate = useNavigate();
+
+  var pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+    cluster: 'ap2',
+    encrypted: true,
+  });
   
     useEffect(() => {
     
     fetchServices();
 
-  
-    
-    var pusher = new Pusher(process.env.REACT_APP_APP_ID, {
-      cluster: 'ap2',
-      encrypted: true,
-    });
+  }, []);
 
-    // Subscribe to the Pusher channel
     var channel = pusher.subscribe('service-channel');
 
       // Listen for service added event
@@ -59,30 +58,18 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         
       });
 
-      // channel.bind('service-status-updated', (data) => {
-
-      //   console.log("data is ",data)
-      //   setServices((prevServices) =>
-      //     prevServices.map((service) =>
-      //       service._id === data.serviceName ? { ...service, status: data.status } : service
-      //     )
-      //   );
-      // });
-  
       // Cleanup on component unmount
       return () => {
         channel.unbind_all();
         pusher.unsubscribe('service-channel');
       };
-}, []);
- 
-
-
+    
+      
   const fetchServices = async () => {
 
     console.log("Inside fetchServices")
     try {
-      const response = await axios.get("https://service-monitoring-server.vercel.app/status");
+      const response = await axios.get("http://localhost:5001/status");
       
       console.log("Request for status of all the service sent..")
 
@@ -202,7 +189,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="service-url">
               <span className={`status-dot ${serviceItem.status === 'up' ? 'up' : serviceItem.status === 'down' ? 'down' : 'unknown'}`}>
-                
+
               </span>
 
                 <a href={serviceItem.url}>{serviceItem.name}</a>

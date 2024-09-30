@@ -205,14 +205,14 @@ const AddServiceForm = ({ onAddService }) => {
 
       {/* Notification Options */}
       <div className="notification-options">
-        {/* <label>
+        <label>
           <input
             type="checkbox"
             checked={email}
             onChange={() => setEmail(!email)}
           />
           Email
-        </label> */}
+        </label>
         <label>
           <input
             type="checkbox"

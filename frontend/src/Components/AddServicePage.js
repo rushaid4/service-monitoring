@@ -35,7 +35,7 @@ const AddServicePage = () => {
           return;
       }
    
-      const response = await axios.post(`https://service-monitoring-server.vercel.app${endpoint}`, service);
+      const response = await axios.post(`http://localhost:5001${endpoint}`, service);
     
       console.log('Service added successfully:', response.data);
     } catch (error) {
