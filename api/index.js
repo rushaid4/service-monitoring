@@ -33,7 +33,7 @@ const JWT_SECRET = 'your_jwt_secret_key';
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: ['http://localhost:3000'], // Replace with your frontend URL
+  origin: ['https://service-monitoring-client.vercel.app'], // Replace with your frontend URL
   methods: ["GET", "POST"],
   credentials: true
 }));

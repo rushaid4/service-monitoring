@@ -9,10 +9,16 @@ import { FaAngleLeft } from "react-icons/fa";
 import { FaAngleRight } from "react-icons/fa";
 import Pusher from 'pusher-js';
 
-var pusher = new Pusher(process.env.REACT_APP_APP_ID, {
-  cluster: 'ap2',
-  encrypted: true,
-});
+var pusher;
+try {
+  pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+    cluster: 'ap2',
+    encrypted: true,
+  });
+  console.log("Pusher initialized:", pusher);
+} catch (error) {
+  console.error("Error initializing Pusher:", error);
+}
 
 const HomePage = ({ isLoggedIn, handleLogout }) => {
   
@@ -29,6 +35,8 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   }, []);
 
   useEffect(() => {
+
+    if (pusher) {
 
     var channel = pusher.subscribe('service-channel');
 
@@ -66,13 +74,14 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         channel.unbind_all();
         pusher.unsubscribe('service-channel');
       };
+    }
     }, []);
 
   const fetchServices = async () => {
 
     console.log("Inside fetchServices")
     try {
-      const response = await axios.get("http://localhost:5001/status");
+      const response = await axios.get("https://service-monitoring-server.vercel.app/status");
       
       console.log("Request for status of all the service sent..")
 
