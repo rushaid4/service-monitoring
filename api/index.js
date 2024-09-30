@@ -8,7 +8,10 @@ const http = require('http');
 const mongoose = require('mongoose');
 const sendSMS = require('./sendSMS')
 const sendCall = require('./sendCall');
+const { sendEmail } = require('./sendEmail');  // Import sendEmail
 const Pusher = require('pusher');
+
+
 
 const app = express()
 const port = 5001;
@@ -28,21 +31,21 @@ const JWT_SECRET = 'your_jwt_secret_key';
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: ['https://service-monitoring-client.vercel.app'], // Replace with your frontend URL
+  origin: ['http://localhost:3000'], // Replace with your frontend URL
   methods: ["GET", "POST"],
   credentials: true
 }));
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://service-monitoring-client.vercel.app');  // Allow all origins
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');  // Allow all origins
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
 
 app.options('*', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://service-monitoring-client.vercel.app');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.sendStatus(200);
@@ -107,7 +110,14 @@ const notifyUser = (notifications, serviceName, status) => {
   console.log("message is ",message )
 
   if (notifications.email) {
-    console.log(`Sending email to  about ${serviceName} being ${status}`);
+    console.log("inside email")
+    // const recipientEmail = 'shameer@cblu.io';  // Replace with actual recipient email or fetch dynamically
+    const recipientEmail = 'shameer@cblu.io'; 
+    console.log(`Sending email about ${serviceName} being ${status}`);
+    
+    sendEmail(recipientEmail, serviceName,status)  // Call sendEmail to send the notification
+      .then(() => console.log("Email notification sent successfully!"))
+      .catch(err => console.error("Error sending email notification:", err));
   }
   
   if (notifications.voice) {
