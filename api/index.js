@@ -18,12 +18,14 @@ const port = 5001;
 
 
 const pusher = new Pusher({
-   appId : process.env.appId,
-   key : process.env.key,
-   secret : process.env.secret,
-   cluster : process.env.cluster,
+   appId : process.env.PUHSER_appId,
+   key : process.env.PUHSER_key,
+   secret : process.env.PUHSER_secret,
+   cluster : process.env.PUHSER_cluster,
    useTLS: true
 });
+
+
 
 const jwt = require('jsonwebtoken');
 const { clearScreenDown } = require('readline');
