@@ -9,23 +9,26 @@ import { FaAngleLeft } from "react-icons/fa";
 import { FaAngleRight } from "react-icons/fa";
 import Pusher from 'pusher-js';
 
+var pusher = new Pusher(process.env.REACT_APP_APP_ID, {
+  cluster: 'ap2',
+  encrypted: true,
+});
+
 const HomePage = ({ isLoggedIn, handleLogout }) => {
+  
   const [services, setServices] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // State to track current page
   const servicesPerPage = 7; // Number of services per page
 
   const navigate = useNavigate();
 
-  var pusher = new Pusher(process.env.REACT_APP_APP_ID, {
-    cluster: 'ap2',
-    encrypted: true,
-  });
-  
-    useEffect(() => {
+  useEffect(() => {
     
     fetchServices();
 
   }, []);
+
+  useEffect(() => {
 
     var channel = pusher.subscribe('service-channel');
 
@@ -63,8 +66,8 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         channel.unbind_all();
         pusher.unsubscribe('service-channel');
       };
-    
-      
+    }, []);
+
   const fetchServices = async () => {
 
     console.log("Inside fetchServices")
