@@ -16,7 +16,12 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   const servicesPerPage = 7; // Number of services per page
 
   const apiUrl = process.env.REACT_APP_BACKEND_URL
-  console.log("backend url is ",process.env.REACT_APP_BACKEND_URL)
+  
+  useEffect(() => {
+    console.log("backend url is", process.env.REACT_APP_BACKEND_URL);
+    console.log("appid is", process.env.REACT_APP_PUSHER_APP_ID);
+  }, []);
+    
 
 
   const pusherRef = useRef(null);
@@ -25,38 +30,41 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   
     useEffect(() => {
 
-      console.log(" appid is ",process.env.REACT_APP_PUSHER_APP_ID)
-    
-    fetchServices();
-
-    
-    if (!pusherRef.current) {
-      pusherRef.current = new Pusher(process.env.REACT_APP_PUSHER_APP_ID, {
+      
+       if (!pusherRef.current) {
+       
+        console.log("initializing Pusher....")
+        pusherRef.current = new Pusher(process.env.REACT_APP_PUSHER_APP_ID, {
         cluster: 'ap2',
-        // encrypted: true,
+        encrypted: true,
+
       });
 
-      pusherRef.current.connection.bind('connected', () => {
+      console.log('Pusher instance:', pusherRef.current);
+      const pusher = pusherRef.current;
+
+      pusher.connection.bind('connected', () => {
         console.log('Pusher is connected');
       });
-    
-      pusherRef.current.connection.bind('disconnected', () => {
+  
+      pusher.connection.bind('disconnected', () => {
         console.log('Pusher is disconnected');
       });
-    
-      pusherRef.current.connection.bind('error', (err) => {
+  
+      pusher.connection.bind('error', (err) => {
         console.error('Pusher connection error:', err);
       });
-    
-      pusherRef.current.connection.bind('connecting', () => {
-        console.log('Pusher is connecting');
-      });
+
+
+
+      fetchServices();
     }
   
     const pusher = pusherRef.current;
 
     // Subscribe to the Pusher channel
     var channel = pusher.subscribe('service-channel');
+    console.log('Subscribed to Pusher channel: service-channel');
 
       // Listen for service added event
       channel.bind('service-added', (data) => { 
@@ -103,6 +111,7 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
     console.log(`${apiUrl}/status`)
     try {
       const response = await axios.get(`${apiUrl}/status`);
+      console.log("request sent");
 
       // const response = await axios.get(`http://localhost:5001/status`);
       
