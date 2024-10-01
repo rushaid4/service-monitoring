@@ -4,12 +4,12 @@ require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
 dotenv.config();  // Ensure environment variables are loaded
 
-console.log("acces key is ",process.env.AWS_ACCESS_KEY)
+console.log("acces key is ",process.env.AWS_ACCESS__KEY)
 console.log("s key is ",process.env.AWS_SECRET_ACCESS_KEY)
 console.log("region is",process.env.AWS_SES_REGION )
 
 const SES_CONFIG = {
-  accessKeyId: process.env.AWS_ACCESS_KEY,
+  accessKeyId: process.env.AWS_ACCESS__KEY,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: process.env.AWS_SES_REGION,
 }
