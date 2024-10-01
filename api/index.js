@@ -40,7 +40,7 @@ const pusher = new Pusher({
 
 const jwt = require('jsonwebtoken');
 const { clearScreenDown } = require('readline');
-const JWT_SECRET = 'your_jwt_secret_key'; 
+const JWT_SECRET = process.env.JWT_SECRET;
 
 console.log(process.env.FRONTEND_URL, "local")
 
@@ -50,9 +50,11 @@ app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app)
+const MONGODB_URI = process.env.MONGODB_URL
 
 
-mongoose.connect('mongodb+srv://Rushaid44:1234@cluster0.dkoeb.mongodb.net/')
+
+mongoose.connect(MONGODB_URI)
 .then(() => {
   console.log('Connected to MongoDB');
 }).catch((err) => {
@@ -160,8 +162,8 @@ app.post('/add-service' , async (req, res) => {
       const response = await axios.get(url);
       responseTime = Date.now() - start;
       status = (response.status >= 200 && response.status < 300) ? 'up' : 'down';
-      errorDetails.errorCode = response.status,
-      errorDetails.errorMessage = response.statusText
+      errorDetails.errorCode = response.status;
+      errorDetails.errorMessage = response.statusText;
     } catch (error) {
       status = 'down';
       responseTime = 0; // Assuming 0 as response time in case of failure
@@ -388,8 +390,8 @@ const monitorService = async (service) => {
       const response = await axios.get(service.url);
       responseTime = Date.now() - start;
       status = (response.status >= 200 && response.status < 300) ? 'up' : 'down';
-      errorDetails.errorCode = response.status,
-      errorDetails.errorMessage = response.statusText
+      errorDetails.errorCode = response.status;
+      errorDetails.errorMessage = response.statusText;
     } catch (error) {
       console.log("in error")
       status = 'down';
