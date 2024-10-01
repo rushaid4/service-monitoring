@@ -30,12 +30,12 @@ const pusher = new Pusher({
    useTLS: true
 });
 
-const corsOptions = {
-  origin: process.env.FRONTEND_URL, // Ensure this is correctly set
-  methods: ["GET", "POST", "PUT", "DELETE"],
+// const corsOptions = {
+//   origin: process.env.FRONTEND_URL, // Ensure this is correctly set
+//   methods: ["GET", "POST", "PUT", "DELETE"],
   // allowedHeaders: ["Content-Type", "Authorization"],
   // credentials: true
-};
+// };
 
 const jwt = require('jsonwebtoken');
 const { clearScreenDown } = require('readline');
@@ -45,7 +45,7 @@ console.log(process.env.FRONTEND_URL, "local")
 
 
 app.use(bodyParser.json());
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app)
