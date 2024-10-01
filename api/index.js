@@ -15,6 +15,8 @@ const { ObjectId } = require('mongoose').Types;
 const app = express()
 const port = 5001;
 
+console.log("frontend url",process.env.FRONTEND_URL)
+
 console.log('Pusher App ID:', process.env.PUSHER_APPID);
 console.log('Pusher Key:', process.env.PUSHER_KEY);
 console.log('Pusher Cluster:', process.env.PUSHER_CLUSTER);
@@ -31,8 +33,8 @@ const pusher = new Pusher({
 const corsOptions = {
   origin: process.env.FRONTEND_URL, // Ensure this is correctly set
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  // allowedHeaders: ["Content-Type", "Authorization"],
+  // credentials: true
 };
 
 const jwt = require('jsonwebtoken');
