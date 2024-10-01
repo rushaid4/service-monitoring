@@ -8,6 +8,8 @@ import './styles/AddServicePage.css';
 const AddServicePage = () => {
  
   const navigate = useNavigate();
+
+  const apiUrl = process.env.REACT_APP_BACKEND_URL
   
 
   const addService = async (service) => {
@@ -35,7 +37,7 @@ const AddServicePage = () => {
           return;
       }
    
-      const response = await axios.post(`http://localhost:5001${endpoint}`, service);
+      const response = await axios.post(`${apiUrl}${endpoint}`, service);
     
       console.log('Service added successfully:', response.data);
     } catch (error) {

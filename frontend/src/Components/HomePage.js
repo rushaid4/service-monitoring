@@ -35,6 +35,22 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         cluster: 'ap2',
         // encrypted: true,
       });
+
+      pusherRef.current.connection.bind('connected', () => {
+        console.log('Pusher is connected');
+      });
+    
+      pusherRef.current.connection.bind('disconnected', () => {
+        console.log('Pusher is disconnected');
+      });
+    
+      pusherRef.current.connection.bind('error', (err) => {
+        console.error('Pusher connection error:', err);
+      });
+    
+      pusherRef.current.connection.bind('connecting', () => {
+        console.log('Pusher is connecting');
+      });
     }
   
     const pusher = pusherRef.current;

@@ -9,6 +9,8 @@
     const [service, setService] = useState(null);
     const navigate = useNavigate();
 
+    const apiUrl = process.env.REACT_APP_BACKEND_URL
+
 
     useEffect(() => {
 
@@ -21,7 +23,7 @@
       const fetchServiceDetails = async () => {
         try {
           console.log("inside fetchServiceDetails function")
-          const response = await fetch(`http://localhost:5001/service/${id}`);
+          const response = await fetch(`${apiUrl}/${id}`);
           console.log("inside fetch 1111")
           const data = await response.json();
           console.log("data is ",data)
@@ -44,7 +46,7 @@
     const confirmDelete = window.confirm(`Are you sure you want to delete ${service.name}? This action cannot be undone.`);
     if (confirmDelete) {
       try {
-        const response = await fetch(`http://localhost:5001/service/${id}`, {
+        const response = await fetch(`${apiUrl}/${id}`, {
           method: 'DELETE',
         });
 

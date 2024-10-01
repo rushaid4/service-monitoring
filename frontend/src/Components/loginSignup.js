@@ -16,12 +16,13 @@ const LoginSignup = ({handleLogin}) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const apiUrl = process.env.REACT_APP_BACKEND_URL
  
 
   const login = async () => {
     console.log("Inside login function");
     try {
-      const response = await fetch("http://localhost:5001/login", {
+      const response = await fetch(`${apiUrl}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
