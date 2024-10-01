@@ -10,50 +10,41 @@ const sendSMS = require('./sendSMS')
 const sendCall = require('./sendCall');
 const { sendEmail } = require('./sendEmail');  // Import sendEmail
 const Pusher = require('pusher');
-
-
+const { ObjectId } = require('mongoose').Types;
 
 const app = express()
 const port = 5001;
 
+console.log('Pusher App ID:', process.env.PUSHER_APPID);
+console.log('Pusher Key:', process.env.PUSHER_KEY);
+console.log('Pusher Cluster:', process.env.PUSHER_CLUSTER);
+
 
 const pusher = new Pusher({
-   appId : process.env.PUHSER_appId,
-   key : process.env.PUHSER_key,
-   secret : process.env.PUHSER_secret,
-   cluster : process.env.PUHSER_cluster,
+   appId : process.env.PUSHER_APPID,
+   key : process.env.PUSHER_KEY,
+   secret : process.env.PUHSER_SECRET,
+   cluster : process.env.PUSHER_CLUSTER,
    useTLS: true
 });
 
-
+const corsOptions = {
+  origin: process.env.FRONTEND_URL, // Ensure this is correctly set
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+};
 
 const jwt = require('jsonwebtoken');
 const { clearScreenDown } = require('readline');
 const JWT_SECRET = 'your_jwt_secret_key'; 
 
+console.log(process.env.FRONTEND_URL, "local")
+
+
 app.use(bodyParser.json());
-app.use(cors({
-  origin: ['https://service-monitoring-client.vercel.app'], // Replace with your frontend URL
-  methods: ["GET", "POST","PUT", "DELETE"],
-  credentials: true
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://service-monitoring-client.vercel.app');  // Allow all origins
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
-
-app.options('*', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://service-monitoring-client.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.sendStatus(200);
-});
-
-
 
 const server = http.createServer(app)
 
@@ -141,7 +132,7 @@ const notifyUser = (notifications, serviceName, status) => {
 
 setInterval(() => {
   monitorServices();
-}, 60000); // 1 min
+}, 30000); // 1 min
 
 
 
@@ -336,8 +327,36 @@ app.get('/service/:id', async (req, res) => {
 
     res.json(service);
   } catch (error) {
-    console.error("Error fetching service:", error);
+    console.error("Error fetching service:", error.message);
     res.status(500).send('Server Error');
+  }
+});
+
+app.delete('/service/:id', async (req, res) => {
+
+  console.log("inside delete service");
+  const serviceId = req.params.id; // Get the service ID from the request parameters
+  console.log("Service ID from params:", serviceId);
+  try {
+    // Validate ObjectId
+    if (!ObjectId.isValid(serviceId)) {
+      return res.status(400).json({ message: 'Invalid service ID' });
+    }
+
+    // Attempt to delete the service
+    const deletedService = await Service.findByIdAndDelete(serviceId);
+
+    if (!deletedService) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Emit Pusher event for deletion (if needed)
+    // await pusher.trigger("service-channel", "service-deleted", { id: serviceId });
+
+    res.status(200).json({ message: 'Service deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting service:', error);
+    res.status(500).json({ message: 'Server error while deleting service' });
   }
 });
 
