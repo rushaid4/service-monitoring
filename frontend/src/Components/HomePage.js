@@ -30,6 +30,8 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   
     useEffect(() => {
 
+      fetchServices();
+
       
        if (!pusherRef.current) {
        
@@ -56,8 +58,6 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
       });
 
 
-
-      fetchServices();
     }
   
     const pusher = pusherRef.current;
