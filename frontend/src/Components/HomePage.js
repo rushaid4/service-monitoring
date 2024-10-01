@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./styles/HomePage.css";
@@ -9,35 +10,36 @@ import { FaAngleLeft } from "react-icons/fa";
 import { FaAngleRight } from "react-icons/fa";
 import Pusher from 'pusher-js';
 
-var pusher;
-try {
-  pusher = new Pusher(process.env.REACT_APP_APP_ID, {
-    cluster: 'ap2',
-    encrypted: true,
-  });
-  console.log("Pusher initialized:", pusher);
-} catch (error) {
-  console.error("Error initializing Pusher:", error);
-}
-
 const HomePage = ({ isLoggedIn, handleLogout }) => {
-  
   const [services, setServices] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // State to track current page
   const servicesPerPage = 7; // Number of services per page
 
-  const navigate = useNavigate();
+  const apiUrl = process.env.REACT_APP_BACKEND_URL
+  console.log("backend url is ",process.env.REACT_APP_BACKEND_URL)
 
-  useEffect(() => {
+
+  const pusherRef = useRef(null);
+
+  const navigate = useNavigate();
+  
+    useEffect(() => {
+
+      console.log(" appid is ",process.env.REACT_APP_PUSHER_APP_ID)
     
     fetchServices();
 
-  }, []);
+    
+    if (!pusherRef.current) {
+      pusherRef.current = new Pusher(process.env.REACT_APP_PUSHER_APP_ID, {
+        cluster: 'ap2',
+        // encrypted: true,
+      });
+    }
+  
+    const pusher = pusherRef.current;
 
-  useEffect(() => {
-
-    if (pusher) {
-
+    // Subscribe to the Pusher channel
     var channel = pusher.subscribe('service-channel');
 
       // Listen for service added event
@@ -69,21 +71,26 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         
       });
 
+  
       // Cleanup on component unmount
       return () => {
         channel.unbind_all();
         pusher.unsubscribe('service-channel');
       };
-    }
-    }, []);
+}, []);
+ 
+
 
   const fetchServices = async () => {
 
     console.log("Inside fetchServices")
+    console.log(`${apiUrl}/status`)
     try {
-      const response = await axios.get("https://service-monitoring-server.vercel.app/status");
+      const response = await axios.get(`${apiUrl}/status`);
+
+      // const response = await axios.get(`http://localhost:5001/status`);
       
-      console.log("Request for status of all the service sent..")
+      console.log(response.data)
 
       if (Array.isArray(response.data)) {
         setServices(response.data); // assuming response.data is an array of services
@@ -93,7 +100,16 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         console.log("service updated 2");
       }
     } catch (error) {
-      console.error("Error fetching services:", error);
+      if (error.response) {
+        // Server responded with a status other than 2xx
+        console.error("Error fetching services:", error.response.data);
+      } else if (error.request) {
+        // Request was made but no response received
+        console.error("No response received:", error.request);
+      } else {
+        // Something else caused the error
+        console.error("Error:", error.message);
+      }
     }
   };
 
@@ -191,13 +207,11 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         )}
       </div>
       <div className="services">
-        {currentServices.map((serviceItem, index) => (
-          <div
-            className={`service-item ${
-              serviceItem.status === "up" ? "up" : "down"
-            }`}
-            key={index}
-          >
+      {currentServices.map((serviceItem) => (
+      <div
+          className={`service-item ${serviceItem.status === "up" ? "up" : "down"}`}
+          key={serviceItem._id}
+        >
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="service-url">
               <span className={`status-dot ${serviceItem.status === 'up' ? 'up' : serviceItem.status === 'down' ? 'down' : 'unknown'}`}>

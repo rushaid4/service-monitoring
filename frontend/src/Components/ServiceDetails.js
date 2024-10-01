@@ -1,5 +1,5 @@
   import React, { useEffect, useState } from 'react';
-  import { useParams } from 'react-router-dom';
+  import { useParams , useNavigate} from 'react-router-dom';
   import './styles/ServiceDetails.css';  // Import the CSS file
   import Pusher from 'pusher-js';
 
@@ -7,33 +7,13 @@
 
     const { id } = useParams();
     const [service, setService] = useState(null);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
 
       console.log("Service details component Rendered")
 
-    //   const pusher = new Pusher(process.env.REACT_APP_APP_ID, {
-    //     cluster: 'ap2',
-    //     encrypted: true,
-    //   });
-
-    //   const channel = pusher.subscribe('service-channel');
-      
-    //   channel.bind('service-update', function (data) {
-    //     console.log("channal bind service page")
-    //     console.log("data in channel bind is ",data);
-    //     console.log("data id is ",data.id);
-    //     console.log("id is ",id);
-    //     if (data.id === id) {
-    //       setService(data); // Update service details in real-time
-    //     }
-    //   });
-
-    //   return () => {
-    //     channel.unbind_all();
-    //     pusher.unsubscribe('service-channel');
-    //   };
     }, [id]);
 
     useEffect(() => {
@@ -41,7 +21,7 @@
       const fetchServiceDetails = async () => {
         try {
           console.log("inside fetchServiceDetails function")
-          const response = await fetch(`https://service-monitoring-server.vercel.app/service/${id}`);
+          const response = await fetch(`http://localhost:5001/service/${id}`);
           console.log("inside fetch 1111")
           const data = await response.json();
           console.log("data is ",data)
@@ -60,9 +40,33 @@
 
   }, [id]);
 
+  const handleDeleteService = async () => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${service.name}? This action cannot be undone.`);
+    if (confirmDelete) {
+      try {
+        const response = await fetch(`http://localhost:5001/service/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          alert("Service deleted successfully");
+          navigate('/');  // Redirect to home or another page after deletion
+        } else {
+          const errorData = await response.json();
+          alert(`Error deleting service: ${errorData.message}`);
+        }
+      } catch (error) {
+        console.error("Error deleting service:", error.message);
+        alert("An error occurred while deleting the service");
+      }
+    }
+  };
+
     if (!service) {
       return <div className="loading">Loading...</div>;
     }
+
+
 
     
     const borderColorClass = service.status === 'up' ? 'status-up' :
@@ -94,6 +98,11 @@
             </li>
           ))}
         </ul>
+
+        {/* Delete button */}
+      <button className="delete-button" onClick={handleDeleteService}>
+        Delete Service
+      </button>
       </div>
     );
   };
