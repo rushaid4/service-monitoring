@@ -20,12 +20,13 @@ console.log("frontend url",process.env.FRONTEND_URL)
 console.log('Pusher App ID:', process.env.PUSHER_APPID);
 console.log('Pusher Key:', process.env.PUSHER_KEY);
 console.log('Pusher Cluster:', process.env.PUSHER_CLUSTER);
+console.log('Pusher secret:', process.env.PUSHER_SECRET);
 
 
 const pusher = new Pusher({
    appId : process.env.PUSHER_APPID,
    key : process.env.PUSHER_KEY,
-   secret : process.env.PUHSER_SECRET,
+   secret : process.env.PUSHER_SECRET,
    cluster : process.env.PUSHER_CLUSTER,
    useTLS: true
 });
@@ -57,6 +58,9 @@ mongoose.connect('mongodb+srv://Rushaid44:1234@cluster0.dkoeb.mongodb.net/')
 }).catch((err) => {
   console.error('Failed to connect to MongoDB', err);
 });
+
+pusher.trigger("service-channel", "test-event", { message: "Test event!" });
+
 
 
 const serviceSchema = new mongoose.Schema({
