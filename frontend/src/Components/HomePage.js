@@ -95,6 +95,11 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
         
       });
 
+      channel.bind('test-event', function(data) {
+        console.log(data.message); // This will log "Test event!" to the console
+        // You can also update your UI or perform other actions here
+      });
+
   
       // Cleanup on component unmount
       return () => {

@@ -23,7 +23,7 @@
       const fetchServiceDetails = async () => {
         try {
           console.log("inside fetchServiceDetails function")
-          const response = await fetch(`${apiUrl}/${id}`);
+          const response = await fetch(`${apiUrl}/service/${id}`);
           console.log("inside fetch 1111")
           const data = await response.json();
           console.log("data is ",data)
