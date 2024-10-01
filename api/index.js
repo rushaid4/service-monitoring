@@ -12,15 +12,40 @@ const { sendEmail } = require('./sendEmail');  // Import sendEmail
 const Pusher = require('pusher');
 const { ObjectId } = require('mongoose').Types;
 
+
 const app = express()
 const port = 5001;
 
-console.log("frontend url",process.env.FRONTEND_URL)
+// Environment Variables
+const {
+  FRONTEND_URL,
+  PUSHER_APPID,
+  PUSHER_KEY,
+  PUSHER_SECRET,
+  PUSHER_CLUSTER,
+  JWT_SECRET,
+  MONGODB_URL,
+} = process.env;
 
-console.log('Pusher App ID:', process.env.PUSHER_APPID);
-console.log('Pusher Key:', process.env.PUSHER_KEY);
-console.log('Pusher Cluster:', process.env.PUSHER_CLUSTER);
-console.log('Pusher secret:', process.env.PUSHER_SECRET);
+// Validate essential environment variables
+if (
+  !FRONTEND_URL ||
+  !PUSHER_APPID ||
+  !PUSHER_KEY ||
+  !PUSHER_SECRET ||
+  !PUSHER_CLUSTER ||
+  !JWT_SECRET ||
+  !MONGODB_URL
+) {
+  console.error("One or more essential environment variables are missing.");
+  process.exit(1); // Exit the application if essential variables are missing
+}
+
+console.log("Frontend URL:", FRONTEND_URL);
+console.log('Pusher App ID:', PUSHER_APPID);
+console.log('Pusher Key:', PUSHER_KEY);
+console.log('Pusher Cluster:', PUSHER_CLUSTER);
+console.log('Pusher Secret:', PUSHER_SECRET);
 
 
 const pusher = new Pusher({
@@ -31,38 +56,44 @@ const pusher = new Pusher({
    useTLS: true
 });
 
-// const corsOptions = {
-//   origin: process.env.FRONTEND_URL, // Ensure this is correctly set
-//   methods: ["GET", "POST", "PUT", "DELETE"],
-  // allowedHeaders: ["Content-Type", "Authorization"],
-  // credentials: true
-// };
+// CORS Configuration
+const corsOptions = {
+  origin: FRONTEND_URL, // Restrict to your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
 const jwt = require('jsonwebtoken');
-const { clearScreenDown } = require('readline');
-const JWT_SECRET = process.env.JWT_SECRET;
-
-console.log(process.env.FRONTEND_URL, "local")
-
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
 
 const server = http.createServer(app)
 const MONGODB_URI = process.env.MONGODB_URL
 
+console.log(MONGODB_URI)
 
-
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 .then(() => {
   console.log('Connected to MongoDB');
 }).catch((err) => {
   console.error('Failed to connect to MongoDB', err);
 });
 
-pusher.trigger("service-channel", "test-event", { message: "Test event!" });
-
+// Test Pusher Connection
+pusher.trigger("service-channel", "test-event", { message: "Test event!" })
+  .then(() => {
+    console.log("Test event triggered successfully.");
+  })
+  .catch((err) => {
+    console.error("Error triggering test event:", err);
+  });
 
 
 const serviceSchema = new mongoose.Schema({
@@ -102,7 +133,7 @@ const serviceSchema = new mongoose.Schema({
 const Service = mongoose.model('Service', serviceSchema);
 
 
-const notifyUser = (notifications, serviceName, status) => {
+const notifyUser = async (notifications, serviceName, status) => {
 
   if (!notifications) return;
   
@@ -116,9 +147,8 @@ const notifyUser = (notifications, serviceName, status) => {
     const recipientEmail = 'shameer@cblu.io'; 
     console.log(`Sending email about ${serviceName} being ${status}`);
     
-    sendEmail(recipientEmail, serviceName,status)  // Call sendEmail to send the notification
-      .then(() => console.log("Email notification sent successfully!"))
-      .catch(err => console.error("Error sending email notification:", err));
+    await sendEmail(recipientEmail, serviceName,status)  // Call sendEmail to send the notification
+    console.log("Email notification sent successfully!");
   }
   
   if (notifications.voice) {
