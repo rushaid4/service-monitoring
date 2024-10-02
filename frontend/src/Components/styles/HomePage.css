@@ -264,5 +264,51 @@
   margin: 0 15px;
 }
 
+.services-container {
+  max-height: 400px; /* Adjust this based on how much space you want for the services list */
+  overflow-y: auto;
+  padding-right: 10px; /* Prevent overlap with the scrollbar */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #888 #eae9e0; 
+}
 
+.services-container::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
 
+.services-container::-webkit-scrollbar-track {
+  background: #eae9e0; /* Scrollbar track color */
+  border-radius: 10px;
+}
+
+.services-container::-webkit-scrollbar-thumb {
+  background-color: #888; /* Scrollbar thumb (the handle) color */
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.services-container::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darker color when hovered */
+}
+
+/* Make the scrollbar disappear until hovered near */
+.services-container {
+  scrollbar-width: none; /* Hides the scrollbar by default for Firefox */
+}
+
+.services-container:hover {
+  scrollbar-width: thin; /* Shows the scrollbar when hovering near the services container for Firefox */
+}
+
+.services-container::-webkit-scrollbar {
+  display: none; /* Hides the scrollbar for WebKit browsers (Chrome, Safari, etc.) */
+}
+
+.services-container:hover::-webkit-scrollbar {
+  display: block; /* Displays the scrollbar when hovering near the services container */
+}
+
+/* Optional: Smooth scrolling */
+.services-container {
+  scroll-behavior: smooth;
+}

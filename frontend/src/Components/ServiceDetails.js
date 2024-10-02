@@ -1,7 +1,7 @@
   import React, { useEffect, useState } from 'react';
   import { useParams , useNavigate} from 'react-router-dom';
   import './styles/ServiceDetails.css';  // Import the CSS file
-  import Pusher from 'pusher-js';
+  
 
   const ServiceDetails = () => {
 
@@ -43,10 +43,11 @@
   }, [id]);
 
   const handleDeleteService = async () => {
+    console.log("inside delete")
     const confirmDelete = window.confirm(`Are you sure you want to delete ${service.name}? This action cannot be undone.`);
     if (confirmDelete) {
       try {
-        const response = await fetch(`${apiUrl}/${id}`, {
+        const response = await fetch(`${apiUrl}/service/${id}`, {
           method: 'DELETE',
         });
 
