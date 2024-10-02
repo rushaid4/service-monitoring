@@ -76,10 +76,7 @@ const MONGODB_URI = process.env.MONGODB_URL
 
 
 
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(MONGODB_URI)
 .then(() => {
   console.log('Connected to MongoDB');
 }).catch((err) => {
@@ -171,7 +168,7 @@ const notifyUser = async (notifications, serviceName, status, firstAdd, timestam
     const recipientEmail = 'rushaid4@gmail.com'; 
     console.log(`Sending email about ${serviceName} being ${status}`);
     
-    await sendEmail(recipientEmail, serviceName,status,details)  // Call sendEmail to send the notification
+    sendEmail(recipientEmail, serviceName,status,details)  // Call sendEmail to send the notification
     console.log("Email notification sent successfully!");
   }
   
@@ -183,7 +180,7 @@ const notifyUser = async (notifications, serviceName, status, firstAdd, timestam
   
   if (notifications.sms) {
     console.log("reached sendSMS");
-    await sendSMS(smsDetails);
+    sendSMS(smsDetails);
   }
 
   if (notifications.mobilePush) {
