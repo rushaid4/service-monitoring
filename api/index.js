@@ -74,7 +74,7 @@ app.use(express.json());
 const server = http.createServer(app)
 const MONGODB_URI = process.env.MONGODB_URL
 
-console.log(MONGODB_URI)
+
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
@@ -133,33 +133,57 @@ const serviceSchema = new mongoose.Schema({
 const Service = mongoose.model('Service', serviceSchema);
 
 
-const notifyUser = async (notifications, serviceName, status) => {
+const notifyUser = async (notifications, serviceName, status, firstAdd, timestamp, errorCode, errorMessage, responseTime) => {
+
+  console.log("inside notify user");
 
   if (!notifications) return;
-  
-  console.log("inside notify user");
-  const message = `Service ${serviceName} is now ${status}`;
-  console.log("message is ",message )
+
+  const dateTimestamp = new Date(timestamp); // Convert timestamp to a Date object
+  // In notifyUser function, use the formatTimestamp function
+  let formattedTimestamp = formatTimestamp(dateTimestamp);
+
+  // Create the details message with relevant information
+  let details = `<strong>Service Name:</strong> ${serviceName}<br>` +
+                `<strong>Status:</strong> ${status}<br>` +
+                `<strong>Response Time:</strong> ${responseTime} ms<br>` +
+                `<strong>Timestamp:</strong> ${formattedTimestamp}<br>`;
+  // Create plain text version for SMS
+  let smsDetails = `Service Name: ${serviceName}\n` +
+                   `Status: ${status}\n` +
+                   `Response Time: ${responseTime || 'N/A'} ms\n` +
+                   `Timestamp: ${formattedTimestamp}\n`;
+
+  // If the service is down, add error details
+  if (status === 'down') {
+    details += `<strong>Error Code:</strong> ${errorCode}<br>` +
+               `<strong>Error Message:</strong>${errorMessage}<br>`;
+
+    smsDetails += `Error Code: ${errorCode || 'N/A'}\n` +
+    `Error Message: ${errorMessage || 'N/A'}\n`;
+  }
+
+  console.log("details are ", details);
 
   if (notifications.email) {
     console.log("inside email")
     // const recipientEmail = 'shameer@cblu.io';  // Replace with actual recipient email or fetch dynamically
-    const recipientEmail = 'shameer@cblu.io'; 
+    const recipientEmail = 'rushaid4@gmail.com'; 
     console.log(`Sending email about ${serviceName} being ${status}`);
     
-    await sendEmail(recipientEmail, serviceName,status)  // Call sendEmail to send the notification
+    await sendEmail(recipientEmail, serviceName,status,details)  // Call sendEmail to send the notification
     console.log("Email notification sent successfully!");
   }
   
   if (notifications.voice) {
     console.log("inside call notify");
-    sendCall(message);
+    sendCall(smsDetails);
     console.log(`Calling about ${serviceName} being ${status}`);
   }
   
   if (notifications.sms) {
     console.log("reached sendSMS");
-    sendSMS(message);
+    await sendSMS(smsDetails);
   }
 
   if (notifications.mobilePush) {
@@ -167,6 +191,10 @@ const notifyUser = async (notifications, serviceName, status) => {
   }
 };
 
+const formatTimestamp = (timestamp) => {
+  const date = new Date(timestamp);
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`; // Format as "YYYY-MM-DD HH:MM"
+};
 
 setInterval(() => {
   monitorServices();
@@ -224,9 +252,20 @@ app.post('/add-service' , async (req, res) => {
      // Emit the new service data to the frontend
      await pusher.trigger("service-channel", "service-added", newService);
 
+     // Set firstAdd to true since it's a new service being added
+      const firstAdd = true;
  
-     // Notify the user about the initial status
-     notifyUser(newService.notifications, newService.name, status);
+    // Call notifyUser with all necessary information
+  notifyUser(
+  newService.notifications,
+  newService.name,
+  status,
+  firstAdd,
+  new Date(),
+  errorDetails.errorCode,
+  errorDetails.errorMessage, // Assuming you have an error message
+  responseTime
+);
  
      res.status(201).json({ message: 'Service added successfully'});
    } catch (error) {
@@ -290,8 +329,20 @@ app.post('/add-whatsapp-service', async (req, res) => {
     console.log("new service in add :",newService1)
     console.log("status of whatsapp is",status)
 
-    // Notify the user about the initial status
-    notifyUser(newService1.notifications, newService1.name, status);
+    // Set firstAdd to true since it's a new service being added
+    const firstAdd = true;
+
+    // Call notifyUser with all necessary information
+notifyUser(
+  newService1.notifications,
+  newService1.name,
+  status,
+  firstAdd,
+  new Date(),
+  errorDetails.errorCode,
+  errorDetails.errorMessage, // Assuming you have an error message
+  responseTime
+);
     console.log("Sending response to frontend");
     res.status(201).json({ message: 'WhatsApp service added successfully' });
   } catch (error) {
@@ -432,7 +483,24 @@ const monitorService = async (service) => {
 
     if (service.status !== status) {
       console.log("Status has changed, notifying the user");
-      notifyUser(service.notifications, service.name, status);
+
+      console.log("Before notifyUser call:");
+      console.log("responseTime:", responseTime);
+      console.log("errorCode:", errorDetails.errorCode);
+      console.log("errorMessage:", errorDetails.errorMessage);
+
+      const firstAdd = false; 
+      const timestamp = new Date();
+      notifyUser(
+        service.notifications,
+        service.name,
+        status,
+        firstAdd,
+        timestamp,
+        errorDetails.errorCode, // Pass the error code
+        errorDetails.errorMessage, // Pass the error message
+        responseTime // Pass the response time
+      );
 
       // Update status history
       service.statusHistory.push({

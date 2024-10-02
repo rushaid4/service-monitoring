@@ -16,7 +16,7 @@ const SES_CONFIG = {
 
 const AWS_SES = new AWS.SES(SES_CONFIG);
 
-const sendEmail = async (recipientEmail, name, status) => {
+const sendEmail = async (recipientEmail, name, status, details) => {
   let params = {
     Source: process.env.AWS_SES_SENDER,
     Destination: {
@@ -30,12 +30,13 @@ const sendEmail = async (recipientEmail, name, status) => {
           Data: `
             <h1>Hello, ${name}!</h1>
             <p>Your service <strong>${name}</strong> is now <strong>${status}</strong>.</p>
-            <p>Thank you for using our service!</p>
+            <p>${details}</p>
+            <p>Thank you for using our service!</p>cl
           `,
         },
         Text: {
           Charset: 'UTF-8',
-          Data: `Hello, ${name}!\nYour service ${name} is now ${status}.\nThank you for using our service!`,
+          Data: `Hello, ${name}!\nYour service ${name} is now ${status}.\n${details.replace(/<br>/g, '\n')}\nThank you for using our service!`,
         },
       },
       Subject: {
