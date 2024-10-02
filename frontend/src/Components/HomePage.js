@@ -17,9 +17,8 @@ const HomePage = ({ isLoggedIn, handleLogout }) => {
   const apiUrl = process.env.REACT_APP_BACKEND_URL;
   
   useEffect(() => {
-    console.log("Backend URL:", apiUrl);
-    console.log("Pusher App ID:", process.env.REACT_APP_PUSHER_APP_ID);
-  }, [apiUrl]);
+    fetchServices();
+  }, []);
 
   const pusherRef = useRef(null);
   const navigate = useNavigate();
