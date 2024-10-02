@@ -74,6 +74,7 @@
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s ease; /* Smooth background color transition */
   margin-top: 10px; /* Top margin */
+  margin-bottom: 10px;
 }
 
 .delete-button:hover {
