@@ -168,7 +168,7 @@ const notifyUser = async (notifications, serviceName, status, firstAdd, timestam
   if (notifications.email) {
     console.log("inside email")
     // const recipientEmail = 'shameer@cblu.io';  // Replace with actual recipient email or fetch dynamically
-    const recipientEmail = 'rushaid4@gmail.com'; 
+    const recipientEmail = 'rushaid4@gmail.com';
     console.log(`Sending email about ${serviceName} being ${status}`);
     
     sendEmail(recipientEmail, serviceName,status,details)  // Call sendEmail to send the notification
