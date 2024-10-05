@@ -10,6 +10,7 @@ import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Pusher from 'pusher-js';
 
 const HomePage = ({ isLoggedIn, handleLogout }) => {
+  
   const [services, setServices] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const servicesPerPage = 7;
