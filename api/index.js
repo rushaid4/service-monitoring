@@ -57,17 +57,17 @@ const pusher = new Pusher({
 });
 
 // CORS Configuration
-const corsOptions = {
-  origin: FRONTEND_URL, // Restrict to your frontend URL
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: FRONTEND_URL, // Restrict to your frontend URL
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+//   credentials: true,
+// };
 
 const jwt = require('jsonwebtoken');
 
 app.use(bodyParser.json());
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 
@@ -130,6 +130,15 @@ const serviceSchema = new mongoose.Schema({
 });
 
 
+
+const contactSchema = new mongoose.Schema({
+  email: { type: String, required: false }, // Email for email notifications
+  phone: { type: String, required: false }, // Phone for SMS or calls
+});
+
+
+
+const Contact = mongoose.model('Contact', contactSchema);
 const Service = mongoose.model('Service', serviceSchema);
 
 
@@ -138,6 +147,10 @@ const notifyUser = async (notifications, serviceName, status, firstAdd, timestam
   console.log("inside notify user");
 
   if (!notifications) return;
+
+  const contacts = await Contact.find({});
+  const phoneNumbers = contacts.map(contact => contact.phone).filter(Boolean);
+  const emails = contacts.map(contact => contact.email).filter(Boolean);
 
   const dateTimestamp = new Date(timestamp); // Convert timestamp to a Date object
   // In notifyUser function, use the formatTimestamp function
@@ -168,22 +181,31 @@ const notifyUser = async (notifications, serviceName, status, firstAdd, timestam
   if (notifications.email) {
     console.log("inside email")
     // const recipientEmail = 'shameer@cblu.io';  // Replace with actual recipient email or fetch dynamically
-    const recipientEmail = 'rushaid4@gmail.com';
+
     console.log(`Sending email about ${serviceName} being ${status}`);
     
-    sendEmail(recipientEmail, serviceName,status,details)  // Call sendEmail to send the notification
+    for (const recipientEmail of emails) {
+      console.log(`Sending email about ${serviceName} being ${status} to ${recipientEmail}`);
+      await sendEmail(recipientEmail, serviceName, status, details);
+    } // Call sendEmail to send the notification
     console.log("Email notification sent successfully!");
   }
   
   if (notifications.voice) {
     console.log("inside call notify");
-    sendCall(smsDetails);
+    for (const number of phoneNumbers) {
+      console.log(`Calling about ${serviceName} being ${status} to ${number}`);
+      await sendCall(smsDetails); // Assuming sendCall takes phone number as argument
+    }
     console.log(`Calling about ${serviceName} being ${status}`);
   }
   
   if (notifications.sms) {
     console.log("reached sendSMS");
-    sendSMS(smsDetails);
+    for (const number of phoneNumbers) {
+      console.log(`Sending SMS about ${serviceName} being ${status} to ${number}`);
+      await sendSMS(smsDetails); // Assuming sendSMS takes phone number as argument
+    }
   }
 
   if (notifications.mobilePush) {
@@ -199,6 +221,72 @@ const formatTimestamp = (timestamp) => {
 setInterval(() => {
   monitorServices();
 }, 60000); // 1 min
+
+
+// Get all contacts
+app.get('/contacts', async (req, res) => {
+  try {
+      const contacts = await Contact.find({});
+      const phoneNumbers = contacts.map(contact => contact.phone).filter(Boolean);
+      const emails = contacts.map(contact => contact.email).filter(Boolean);
+      res.json({ phoneNumbers, emails });
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching contacts' });
+  }
+});
+
+// Add a new phone number
+app.post('/contacts/phone', async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone.match(/^\d{10}$/)) {
+    return res.status(400).json({ message: 'Invalid phone number format' });
+}
+  try {
+      const newContact = new Contact({ phone });
+      await newContact.save();
+      res.status(201).json(newContact);
+  } catch (error) {
+      res.status(500).json({ message: 'Error adding phone number' });
+  }
+});
+
+// Add a new email
+app.post('/contacts/email', async (req, res) => {
+  const { email } = req.body;
+
+
+  try {
+      const newContact = new Contact({ email });
+      await newContact.save();
+      res.status(201).json(newContact);
+  } catch (error) {
+      res.status(500).json({ message: 'Error adding email' });
+  }
+});
+
+// Delete a phone number
+app.delete('/contacts/phone/:phone', async (req, res) => {
+  const { phone } = req.params;
+  try {
+      await Contact.deleteOne({ phone });
+      res.status(204).send();
+  } catch (error) {
+      res.status(500).json({ message: 'Error deleting phone number' });
+  }
+});
+
+// Delete an email
+app.delete('/contacts/email/:email', async (req, res) => {
+  const { email } = req.params;
+  try {
+      await Contact.deleteOne({ email });
+      res.status(204).send();
+  } catch (error) {
+      res.status(500).json({ message: 'Error deleting email' });
+  }
+});
+
 
 
 
